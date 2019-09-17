@@ -90,17 +90,26 @@ namespace IdentityModel.OidcClient
         {
             _logger.LogTrace("CreateAuthorizeStateAsync");
 
-            var pkce = _crypto.CreatePkceData();
-
             var state = new AuthorizeState
             {
-                Nonce = _crypto.CreateNonce(),
                 State = _crypto.CreateState(),
                 RedirectUri = _options.RedirectUri,
-                CodeVerifier = pkce.CodeVerifier,
             };
 
-            state.StartUrl = CreateAuthorizeUrl(state.State, state.Nonce, pkce.CodeChallenge, extraParameters);
+            string codeChallenge = null;
+            if (_options.UsePkce)
+            {
+                var pkce = _crypto.CreatePkceData();
+                state.CodeVerifier = pkce.CodeVerifier;
+                codeChallenge = pkce.CodeChallenge;
+            }
+
+            if (_options.UseNonce)
+            {
+                state.Nonce = _crypto.CreateNonce();
+            }
+
+            state.StartUrl = CreateAuthorizeUrl(state.State, state.Nonce, codeChallenge, extraParameters);
 
             _logger.LogDebug(LogSerializer.Serialize(state));
 
@@ -146,12 +155,18 @@ namespace IdentityModel.OidcClient
             var parameters = new Dictionary<string, string>
             {
                 { OidcConstants.AuthorizeRequest.ResponseType, responseType },
-                { OidcConstants.AuthorizeRequest.Nonce, nonce },
-                { OidcConstants.AuthorizeRequest.State, state },
-                { OidcConstants.AuthorizeRequest.CodeChallenge, codeChallenge },
-                { OidcConstants.AuthorizeRequest.CodeChallengeMethod, OidcConstants.CodeChallengeMethods.Sha256 },
+                { OidcConstants.AuthorizeRequest.State, state }
             };
 
+            if (_options.UseNonce)
+            {
+                parameters.Add(OidcConstants.AuthorizeRequest.Nonce, nonce);
+            }
+            if (_options.UsePkce)
+            {
+                parameters.Add(OidcConstants.AuthorizeRequest.CodeChallenge, codeChallenge);
+                parameters.Add(OidcConstants.AuthorizeRequest.CodeChallengeMethod, OidcConstants.CodeChallengeMethods.Sha256);
+            }
             if (_options.ClientId.IsPresent())
             {
                 parameters.Add(OidcConstants.AuthorizeRequest.ClientId, _options.ClientId);

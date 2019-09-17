@@ -147,6 +147,22 @@ namespace IdentityModel.OidcClient
         public AuthenticationFlow Flow { get; set; } = AuthenticationFlow.AuthorizationCode;
 
         /// <summary>
+        /// Gets or sets whether to use a nonce or not
+        /// </summary>
+        /// <value>
+        /// The use nonce setting
+        /// </value>
+        public bool UseNonce { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether to use PKCE or not
+        /// </summary>
+        /// <value>
+        /// The PKCE setting
+        /// </value>
+        public bool UsePkce { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets the inner HTTP handler used with RefreshTokenHandler.
         /// </summary>
         /// <value>
