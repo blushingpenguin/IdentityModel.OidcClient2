@@ -120,7 +120,7 @@ namespace IdentityModel.OidcClient
 
             // validate token response
             var tokenResponseValidationResult = await ValidateTokenResponseAsync(tokenResponse, state,
-                cancellationToken: cancellationToken);
+                true, cancellationToken);
             if (tokenResponseValidationResult.IsError)
             {
                 return new ResponseValidationResult(tokenResponseValidationResult.Error);
@@ -159,8 +159,8 @@ namespace IdentityModel.OidcClient
             }
 
             // validate token response
-            var tokenResponseValidationResult = await ValidateTokenResponseAsync(tokenResponse, state, 
-                cancellationToken: cancellationToken);
+            var tokenResponseValidationResult = await ValidateTokenResponseAsync(tokenResponse, state,
+                _options.Scope?.Contains("openid") == true, cancellationToken);
             if (tokenResponseValidationResult.IsError)
             {
                 return new ResponseValidationResult($"Error validating token response: {tokenResponseValidationResult.Error}");
@@ -170,7 +170,7 @@ namespace IdentityModel.OidcClient
             {
                 AuthorizeResponse = authorizeResponse,
                 TokenResponse = tokenResponse,
-                User = tokenResponseValidationResult.IdentityTokenValidationResult.User
+                User = tokenResponseValidationResult?.IdentityTokenValidationResult?.User
             };
         }
 

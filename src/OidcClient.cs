@@ -219,7 +219,7 @@ namespace IdentityModel.OidcClient
                 }
             }
 
-            var user = ProcessClaims(result.User, userInfoClaims);
+            var user = result.User == null ? null : ProcessClaims(result.User, userInfoClaims);
 
             var loginResult = new LoginResult
             {
